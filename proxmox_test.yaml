@@ -1,0 +1,16 @@
+---
+- name: Check Proxmox Connectivity
+  hosts: proxmox1
+  become: yes
+
+  tasks:
+    - name: Ping Proxmox Node
+      ping:
+
+    - name: Check Proxmox Version
+      command: pvesh get /version
+      register: proxmox_version
+
+    - name: Show Proxmox Version
+      debug:
+        msg: "Proxmox version is {{ proxmox_version.stdout }}"
