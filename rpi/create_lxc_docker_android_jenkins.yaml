@@ -1,0 +1,41 @@
+- hosts: proxmox
+  become: yes
+  gather_facts: yes
+  tasks:
+    #    - name: Ensure Python3 and pip are installed
+    #      apt:
+    #        name:
+    #          - python3
+    #          - python3-pip
+    #        state: present
+    #      when: ansible_os_family == "Debian"
+
+    #    - name: Install Proxmoxer Python library
+    #      pip:
+    #        name: proxmoxer
+    #        state: present
+
+    - name: Create LXC container
+      community.general.proxmox:
+        api_user: root@pam
+        api_password: Qq123456
+        api_host: 192.168.0.25
+        node: irish
+        vmid: 105
+        hostname: cicdandroid
+        password:
+        ostemplate: local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz
+        storage: local-lvm
+        memory: 2048
+        swap: 2048
+        netif: '{"net0":"name=eth0,bridge=vmbr0,ip=192.168.0.75/24,gw=192.168.0.1"}'
+        state: present
+
+    - name: Install Docker in LXC
+      delegate_to: cicdandroid
+      shell: |
+        apt update && apt install -y apt-transport-https ca-certificates curl software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        apt update
+        apt install -y docker-ce
